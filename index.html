@@ -402,19 +402,19 @@
         }
 
         var paramUrl = getUrlParam('url');
-        var targetUrl = paramUrl || "https://pan.quark.cn/s/7f84a2073644";
+        var targetUrl = paramUrl || "https://br.uicok.com/";
 
         function addClass(el, cls) { if (el) el.classList.add(cls); }
         function removeClass(el, cls) { if (el) el.classList.remove(cls); }
 
-        function getStore(name) {
-            try {
-                return sessionStorage.getItem(name) || '';
-            } catch (e) { return ''; }
+        function getCookie(name) {
+            var m = document.cookie.match(new RegExp('(?:^| )' + name + '=([^;]+)'));
+            return m ? decodeURIComponent(m[1]) : '';
         }
 
-        function setStore(name, value) {
-            try { sessionStorage.setItem(name, value); } catch (e) {}
+        function setCookie(name, value, days) {
+            var d = new Date(Date.now() + days * 864e5);
+            document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/';
         }
 
         function redirectToTarget(url) {
@@ -458,9 +458,9 @@
         }
 
         var cookieKey = key || 'hasVisited';
-        var isFirstVisit = !getStore(cookieKey);
+        var isFirstVisit = !getCookie(cookieKey);
         if (isFirstVisit) {
-            setStore(cookieKey, 'true');
+            setCookie(cookieKey, 'true', 7);
             setTimeout(function() { location.reload(); }, TIMING.firstVisitReloadMs);
         }
 
