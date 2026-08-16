@@ -1,0 +1,21 @@
+{
+    "default": "https://pan.quark.cn/s/27b2535c2450",
+    "targets": {
+        "/lain/": {
+            "url": "https://pan.quark.cn/s/27b2535c2450",
+            "label": "lian页面"
+        },
+        "/lian2/": {
+            "url": "https://pan.quark.cn/s/0555b0023715",
+            "label": "lian2页面"
+        },
+        "/lian3/": {
+            "url": "https://pan.quark.cn/s/ec94369ea647",
+            "label": "lian3页面"
+        },
+        "/lian4/": {
+            "url": "https://pan.quark.cn/s/de9ed8398ec2",
+            "label": "lian4页面"
+        }
+    }
+}

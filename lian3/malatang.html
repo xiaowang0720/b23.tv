@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陇香源 · 兰考县甘肃麻辣烫底料</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #c82b2b;
+    --red-dark: #8c1f12;
+    --yellow: #e8b042;
+    --warm: #fff6ea;
+    --ink: #3d2b1f;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    color: var(--ink);
+    background: var(--warm);
+    line-height: 1.6;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: url("assets/banner1.jpg") center 65% / cover no-repeat;
+    filter: brightness(.78);
+    transform: scale(1.02);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(60,15,8,.55) 0%, rgba(92,31,18,.3) 50%, rgba(60,15,8,.72) 100%);
+  }
+  .hero-inner { position: relative; z-index: 1; padding: 60px 20px; }
+  .badge {
+    display: inline-block;
+    background: var(--yellow);
+    color: #5a1f12;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+    padding: 6px 18px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-size: clamp(38px, 7vw, 66px);
+    letter-spacing: 6px;
+    margin-bottom: 16px;
+    text-shadow: 0 4px 18px rgba(0,0,0,.4);
+  }
+  .hero h1 .suffix { display: inline-block; font-size: .45em; vertical-align: middle; letter-spacing: 2px; }
+  .hero .tagline {
+    font-size: clamp(16px, 2.4vw, 20px);
+    opacity: .95;
+    max-width: 620px;
+    margin: 0 auto 34px;
+    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--yellow);
+    color: #5a1f12;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 14px 42px;
+    border-radius: 48px;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,.4); background: #f4c35e; }
+  .cta-btn.ghost { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.5); }
+  .cta-btn.ghost:hover { background: rgba(255,255,255,.22); }
+  .hero .cta-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- Section titles ---------- */
+  section { padding: 76px 0; }
+  .section-title {
+    font-size: clamp(26px, 4vw, 36px);
+    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
+    color: var(--red-dark);
+  }
+  .section-sub {
+    text-align: center;
+    color: #8a6f5a;
+    margin-bottom: 46px;
+    font-size: 15px;
+  }
+
+  /* ---------- Shop intro ---------- */
+  .shop { background: #fff; }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  .shop-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .shop-pics img {
+    width: 100%; height: 300px; object-fit: cover;
+    border-radius: 14px; display: block;
+    box-shadow: 0 8px 22px rgba(61,43,31,.18);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .shop-pics img.big { height: 620px; grid-column: 1 / -1; }
+  .shop-pics img:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(61,43,31,.25); }
+  .shop-text h3 { font-size: 24px; color: var(--red-dark); margin-bottom: 12px; }
+  .shop-text p { color: #6f5743; margin-bottom: 12px; font-size: 15px; }
+  .shop-text .line { height: 4px; width: 48px; background: var(--red); border-radius: 2px; margin: 0 0 18px; }
+
+  /* ---------- Products ---------- */
+  .products { background: var(--warm); }
+  .prod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
+  }
+  .prod-card {
+    background: #fff;
+    border: 1px solid #f0ddc2;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(61,43,31,.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .prod-card:hover { transform: translateY(-6px); box-shadow: 0 16px 34px rgba(61,43,31,.16); }
+  .prod-card .img { position: relative; overflow: hidden; }
+  .prod-card img { width: 100%; height: 300px; object-fit: cover; display: block; transition: transform .4s ease; }
+  .prod-card:hover img { transform: scale(1.06); }
+  .prod-card .tag {
+    position: absolute; left: 12px; top: 12px;
+    background: var(--red); color: #fff;
+    font-size: 12px; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 999px;
+  }
+  .prod-card .tag.yellow { background: var(--yellow); color: #5a1f12; }
+  .prod-card .body { padding: 16px 18px 18px; }
+  .prod-card .name { font-size: 17px; font-weight: 700; color: var(--red-dark); }
+  .prod-card .desc { font-size: 13px; color: #8a6f5a; margin-top: 6px; }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    background: linear-gradient(150deg, #c82b2b, #6f180c);
+    color: #fff;
+    text-align: center;
+  }
+  .contact .section-title { color: #fff; }
+  .contact .section-sub { color: #f8dfbf; }
+  .phone-box {
+    display: inline-block;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 16px;
+    padding: 22px 52px;
+    margin: 10px 0 8px;
+  }
+  .phone-box .label { font-size: 14px; opacity: .85; letter-spacing: 1px; }
+  .phone-box .value {
+    font-size: clamp(34px, 6vw, 52px);
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-top: 8px;
+  }
+  .phone-box .value a { color: #fff; text-decoration: none; }
+  .phone-big-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 26px;
+  }
+  .phone-big-card .item {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+  }
+  .phone-big-card .item .ico { font-size: 30px; display: block; margin-bottom: 8px; }
+  .phone-big-card .item .l { font-size: 13px; opacity: .85; }
+  .phone-big-card .item .v { font-size: 17px; font-weight: 700; margin-top: 4px; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: #3d2417;
+    color: #c9a47e;
+    text-align: center;
+    padding: 26px 0;
+    font-size: 13px;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 860px) {
+    .shop-grid { grid-template-columns: 1fr; }
+    .shop-pics img.big { height: 420px; grid-column: auto; }
+    .shop-pics { grid-template-columns: 1fr; }
+    .prod-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 首屏 ============ -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <span class="badge">🔥 甘肃味道 · 真材实料</span>
+    <h1>
+      兰考县甘肃麻辣烫底料<span class="suffix">· 陇香源</span>
+    </h1>
+    <p class="tagline">正宗甘肃油泼辣子配方 · 汤底浓香醇厚<br>开店摆摊、家用自留都合适</p>
+    <div class="cta-row">
+      <a href="#contact" class="cta-btn">📞 电话咨询订购</a>
+      <a href="#products" class="cta-btn ghost">向下查看商品 ↓</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 店铺介绍 ============ -->
+<section class="shop" id="shop">
+  <div class="container">
+    <h2 class="section-title">关于陇香源</h2>
+    <p class="section-sub">一口地道陇味，从源头开始</p>
+    <div class="shop-grid">
+      <div class="shop-text">
+        <div class="line"></div>
+        <h3>从甘肃厨房到你的餐桌</h3>
+        <p>兰考县·陇香源专注正宗甘肃麻辣烫底料，选用优质秦椒、陇产香料，按传统配方炒制熬炼，一袋底料轻松煮出一锅鲜香麻辣的家乡味。</p>
+        <p>从源头把控原料，真材实料看得见。适合家庭自煮、餐饮店、摆摊创业，支持批零兼售、全国发货，量大可电话详谈优惠。</p>
+        <p>想合作或尝鲜，欢迎随时来电咨询。</p>
+      </div>
+      <div class="shop-pics">
+        <img class="big" src="assets/banner1.jpg" alt="店铺环境">
+        <img src="assets/banner2.jpg" alt="店内实拍">
+        <img src="assets/banner3.jpg" alt="美食实拍">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 商品展示 ============ -->
+<section class="products" id="products">
+  <div class="container">
+    <h2 class="section-title">底料与周边</h2>
+    <p class="section-sub">商品价格电话咨询，量大从优</p>
+    <div class="prod-grid">
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag">招牌</span>
+          <img src="assets/4.jpg" alt="麻辣烫底料">
+        </div>
+        <div class="body">
+          <div class="name">麻辣烫底料 · 家庭装</div>
+          <div class="desc">真材实料，简单加水煮开即可，一包出汤一大锅。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag">招牌</span>
+          <img src="assets/5.jpg" alt="麻辣烫底料">
+        </div>
+        <div class="body">
+          <div class="name">麻辣烫底料 · 餐饮装</div>
+          <div class="desc">开店摆摊首选，出汤快、成本省，支持批发。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag yellow">辣度可选</span>
+          <img src="assets/6.jpg" alt="麻辣烫底料">
+        </div>
+        <div class="body">
+          <div class="name">香辣底料 · 中辣</div>
+          <div class="desc">微麻微辣，汤味醇厚，全家都能吃。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag">特制</span>
+          <img src="assets/7.jpg" alt="麻辣烫底料">
+        </div>
+        <div class="body">
+          <div class="name">油泼辣子 · 特制款</div>
+          <div class="desc">拌面、蘸料、夹馍都香，清炒凉拌两相宜。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag">纯正</span>
+          <img src="assets/8.jpg" alt="麻辣烫底料">
+        </div>
+        <div class="body">
+          <div class="name">麻辣烫底料 · 香辣款</div>
+          <div class="desc">麻辣鲜香，越煮越有味。</div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="img">
+          <span class="tag yellow">新品</span>
+          <img src="assets/9.jpg" alt="麻辣烫底料套装">
+        </div>
+        <div class="body">
+          <div class="name">底料礼盒 / 套装</div>
+          <div class="desc">馈赠亲友、开业伴手礼，全国可发。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 联系方式 ============ -->
+<section class="contact" id="contact">
+  <div class="container">
+    <h2 class="section-title">咨询 · 订购</h2>
+    <p class="section-sub">一个电话，底料到家</p>
+    <div class="phone-box">
+      <div class="label">📞 订购热线 / 微信同号</div>
+      <div class="value"><a href="tel:15556624583">15556624583</a></div>
+    </div>
+    <div class="phone-big-card">
+      <div class="item">
+        <span class="ico">🚚</span>
+        <div class="l">发货方式</div>
+        <div class="v">全国物流 · 包装防破损</div>
+      </div>
+      <div class="item">
+        <span class="ico">🏷️</span>
+        <div class="l">价格优惠</div>
+        <div class="v">电话询价 · 量大从优</div>
+      </div>
+      <div class="item">
+        <span class="ico">🤝</span>
+        <div class="l">合作模式</div>
+        <div class="v">批发 / 零售 / 餐饮合作</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    陇香源 · 兰考县甘肃麻辣烫底料　© 2026　|　正宗陇味 · 麻辣鲜香　|　订购热线：15556624583
+  </div>
+</footer>
+
+</body>
+</html>

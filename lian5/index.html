@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>三连检测中...</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html {
+            width: 100%; height: 100%;
+            background: #f4f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+        .container {
+            width: 100%; min-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            background: linear-gradient(180deg, #f8f9fb 0%, #f0f2f5 100%);
+        }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px 24px 24px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #fb7299, #fc9ab8);
+        }
+        .illustration {
+            width: 160px;
+            margin: 0 auto 16px;
+            display: block;
+            border-radius: 12px;
+        }
+        .error-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .error-row.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .x-icon {
+            width: 28px; height: 28px;
+            background: #fb7299;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            flex-shrink: 0;
+        }
+        .x-icon svg { width: 14px; height: 14px; }
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #222;
+        }
+        .desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 18px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
+            font-weight: 500;
+        }
+        .desc.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .steps {
+            background: #fef6f9;
+            border-radius: 12px;
+            padding: 14px 16px;
+            text-align: left;
+            border: 1px solid #fde8ef;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+        }
+        .steps.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: #333;
+            line-height: 1.6;
+            padding: 10px 0;
+            font-weight: 500;
+        }
+        .step + .step { border-top: 1px solid #fef0f4; }
+        .step-dot {
+            width: 6px; height: 6px; min-width: 6px;
+            background: #fb7299;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .hl { color: #fb7299; font-weight: 500; }
+        .footer {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.3s;
+        }
+        .footer.show {
+            opacity: 1;
+        }
+        .footer img { width: 48px; opacity: 0.2; }
+        .footer span { font-size: 11px; color: #ccc; }
+        
+        .detection-status {
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+            border-radius: 12px;
+            border: 1px solid #91d5ff;
+            color: #1890ff;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .detection-status.hide {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #1890ff;
+            animation: loading 1.4s infinite ease-in-out both;
+        }
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes loading {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .progress-bar.hide {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #52c41a, #73d13d);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 3s linear;
+        }
+        .success-content {
+            display: none;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .success-content.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .success-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #52c41a, #73d13d);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(82, 196, 26, 0.35);
+            transition: background 0.45s ease, box-shadow 0.45s ease;
+        }
+        .success-icon.fail {
+            background: linear-gradient(135deg, #ff4d4f, #ff7875);
+            box-shadow: 0 4px 16px rgba(255, 77, 79, 0.28);
+        }
+        .success-icon svg { width: 28px; height: 28px; }
+        .success-icon .icon-check,
+        .success-icon .icon-x {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .success-icon .icon-check { opacity: 1; transform: scale(1); }
+        .success-icon .icon-x { opacity: 0; transform: scale(0.9); position: absolute; }
+        .success-icon { position: relative; }
+        .success-icon.fail .icon-check { opacity: 0; transform: scale(0.9); }
+        .success-icon.fail .icon-x { opacity: 1; transform: scale(1); }
+        .success-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 8px;
+            transition: color 0.35s ease, transform 0.35s ease, opacity 0.35s ease;
+        }
+        .success-title span {
+            display: inline-block;
+            transition: opacity 0.38s ease, transform 0.38s ease;
+        }
+        .success-title .title-success { opacity: 1; transform: translateY(0); }
+        .success-title .title-fail { opacity: 0; transform: translateY(6px); position: absolute; left: 0; right: 0; }
+        .success-title { position: relative; }
+        .success-content.is-failing .success-title .title-success { opacity: 0; transform: translateY(-6px); }
+        .success-content.is-failing .success-title .title-fail { opacity: 1; transform: translateY(0); }
+        .success-desc {
+            font-size: 13px;
+            color: #52c41a;
+            margin-bottom: 24px;
+            max-height: 48px;
+            overflow: hidden;
+            transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.45s ease, margin-bottom 0.45s ease;
+        }
+        .success-content.is-failing .success-desc {
+            opacity: 0;
+            transform: translateY(6px);
+            pointer-events: none;
+            max-height: 0;
+            margin-bottom: 10px;
+        }
+
+        .manual-redirect {
+            display: none;
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px 14px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1890ff, #40a9ff);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(24, 144, 255, 0.25);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .manual-redirect.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .manual-redirect:active {
+            transform: translateY(1px);
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <img class="illustration" src="assets/illustration.jpg" alt="验证提示">
+            
+            <div id="detectionStatus" class="detection-status">
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>正在检测验证状态，请稍候...</span>
+            </div>
+            
+            <div id="successContent" class="success-content">
+                <div id="resultIcon" class="success-icon">
+                    <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    <svg class="icon-x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </div>
+                <div id="resultTitle" class="success-title">
+                    <span class="title-success">三连验证通过</span>
+                    <span class="title-fail">自动跳转失败</span>
+                </div>
+                <div id="resultDesc" class="success-desc">感谢三连，正在为您跳转...</div>
+                <button id="manualRedirectBtn" class="manual-redirect" type="button">点击跳转</button>
+            </div>
+            
+            <div id="errorContent" style="display: none;">
+                <div class="error-row">
+                    <div class="x-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="title">三连验证未通过</div>
+                </div>
+                <div class="desc" style="color: #333; font-weight: 550;">
+                    系统检测到您尚未完成三连+关注<br>请完成以下步骤后刷新当前页面
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-dot"></div>
+                        <span>返回稿件播放页，检查是否已完成三连</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-dot"></div>
+                        <span>对稿件完成 <span class="hl">点赞 · 投币 · 收藏</span> 三连</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-dot"></div>
+                        <span>完成后<span style="color: #1E90FF; text-decoration: underline; cursor: pointer;" >刷新本页面</span>打开即可</span>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <img src="assets/bili-logo.jpg" alt="bilibili">
+                    <span>三连验证系统</span>
+                </div>
+            </div>
+            
+            <div id="progressBar" class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="footer">
+                <img src="assets/bili-logo.jpg" alt="bilibili">
+                <span>三连验证系统</span>
+            </div>
+        </div>
+    </div>
+    
+   <script src="/lian/config.js"></script>
+   <script>
+    document.oncontextmenu = function() { return false; };
+    document.onkeydown = function(e) {
+        e = e || window.event;
+        var k = e.keyCode || e.which;
+        return !(k === 123 || (e.ctrlKey && e.shiftKey && (k === 73 || k === 74)) || (e.ctrlKey && k === 85));
+    };
+
+    window.onload = function() {
+        var TIMING = {
+            firstVisitReloadMs: 15000,
+            detectPhaseMs: 1000,
+            redirectDelayMs: 1000,
+            fallbackCheckMs: 2000,
+            errorRevealMs: 100
+        };
+
+        var detectionStatus = document.getElementById('detectionStatus'),
+            successContent = document.getElementById('successContent'),
+            errorContent = document.getElementById('errorContent'),
+            progressBar = document.getElementById('progressBar'),
+            progressFill = document.getElementById('progressFill'),
+            manualRedirectBtn = document.getElementById('manualRedirectBtn'),
+            resultIcon = document.getElementById('resultIcon'),
+            resultDesc = document.getElementById('resultDesc'),
+            footerEl = document.querySelector('.card > .footer:last-of-type'),
+            key = "iMxBt";
+
+        // ===== 从 URL 参数读取跳转链接 =====
+        function getUrlParam(name) {
+            var match = location.search.match(new RegExp('(?:\\?|&)' + name + '=([^&]*)'));
+            return match ? decodeURIComponent(match[1]) : null;
+        }
+
+        var paramUrl = getUrlParam('url');
+        var targetUrl = paramUrl || lookupSiteTarget();
+
+        // ===== 从 config.js 读取动态配置的跳转地址 =====
+        function lookupSiteTarget() {
+            var targets = window.SITE_TARGETS || {};
+            var p = location.pathname;
+            var cands = [p, p.replace(/\/$/, ''), p + '/'];
+            for (var i = 0; i < cands.length; i++) {
+                if (targets[cands[i]]) return targets[cands[i]];
+            }
+            return window.SITE_DEFAULT || '';
+        }
+
+        function addClass(el, cls) { if (el) el.classList.add(cls); }
+        function removeClass(el, cls) { if (el) el.classList.remove(cls); }
+
+        function getCookie(name) {
+            var m = document.cookie.match(new RegExp('(?:^| )' + name + '=([^;]+)'));
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        function setCookie(name, value, days) {
+            var d = new Date(Date.now() + days * 864e5);
+            document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/';
+        }
+
+        function redirectToTarget(url) {
+            if (!url) {
+                alert('跳转地址解析失败，请刷新页面重试');
+                return;
+            }
+            location.href = url;
+        }
+
+        function resetSuccessState() {
+            removeClass(successContent, 'is-failing');
+            removeClass(resultIcon, 'fail');
+            removeClass(manualRedirectBtn, 'show');
+            if (resultDesc) {
+                resultDesc.style.display = 'block';
+                resultDesc.textContent = '感谢三连，正在为您跳转...';
+            }
+        }
+
+        function showRedirectFallback() {
+            if (!manualRedirectBtn) return;
+            if (!document.visibilityState || document.visibilityState === 'visible') {
+                addClass(resultIcon, 'fail');
+                addClass(successContent, 'is-failing');
+                addClass(manualRedirectBtn, 'show');
+            }
+        }
+
+        function showErrorState() {
+            var errorRow = document.querySelector('.error-row'),
+                desc = document.querySelector('.desc'),
+                steps = document.querySelector('.steps');
+            if (errorContent) errorContent.style.display = 'block';
+            setTimeout(function() {
+                addClass(errorRow, 'show');
+                addClass(desc, 'show');
+                addClass(steps, 'show');
+                addClass(footerEl, 'show');
+            }, TIMING.errorRevealMs);
+        }
+
+        var cookieKey = key || 'hasVisited';
+        var isFirstVisit = !getCookie(cookieKey);
+        if (isFirstVisit) {
+            setCookie(cookieKey, 'true', 7);
+            setTimeout(function() { location.reload(); }, TIMING.firstVisitReloadMs);
+        }
+
+        if (manualRedirectBtn) manualRedirectBtn.onclick = function() { redirectToTarget(targetUrl); };
+        if (progressFill) progressFill.style.width = '100%';
+
+        setTimeout(function() {
+            addClass(detectionStatus, 'hide');
+            addClass(progressBar, 'hide');
+
+            if (!targetUrl) {
+                alert('跳转地址解析失败，请刷新页面重试');
+                return;
+            }
+
+            if (!isFirstVisit) {
+                addClass(successContent, 'show');
+                addClass(footerEl, 'show');
+                resetSuccessState();
+                setTimeout(function() {
+                    redirectToTarget(targetUrl);
+                    setTimeout(showRedirectFallback, TIMING.fallbackCheckMs);
+                }, TIMING.redirectDelayMs);
+                return;
+            }
+
+            showErrorState();
+        }, TIMING.detectPhaseMs);
+    };
+</script>
+       
+</body>
+</html>
