@@ -16,14 +16,17 @@ function loadConf() {
     $f = __DIR__ . '/config.json';
     if (is_file($f)) {
         $d = json_decode(file_get_contents($f), true);
-        if (is_array($d)) return $d;
+        if (is_array($d)) {
+            if (!isset($d['updated_at'])) $d['updated_at'] = 0;
+            return $d;
+        }
     }
-    return array('default' => 'https://pan.quark.cn/s/27b2535c2450', 'targets' => array());
+    return array('default' => 'https://pan.quark.cn/s/27b2535c2450', 'targets' => array(), 'updated_at' => 0);
 }
 function saveConf($default, $targets) {
     $jsonFile = __DIR__ . '/config.json';
     $jsFile   = __DIR__ . '/config.js';
-    $data = array('default' => $default, 'targets' => $targets);
+    $data = array('default' => $default, 'targets' => $targets, 'updated_at' => time());
     file_put_contents($jsonFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
     $urls = array();
     foreach ($targets as $p => $t) { $urls[$p] = $t['url']; }
@@ -49,24 +52,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = '密码错误';
         }
     } elseif ($authed && isset($_POST['save'])) {
-        $default = trim((string)($_POST['default_url'] ?? ''));
-        if ($default === '') { $default = 'https://pan.quark.cn/s/27b2535c2450'; }
-        $targets = array();
-        $paths  = (array)($_POST['path'] ?? array());
-        $labels = (array)($_POST['label'] ?? array());
-        $urls   = (array)($_POST['url'] ?? array());
-        foreach ($paths as $i => $p) {
-            $p = trim((string)$p);
-            $u = trim((string)($urls[$i] ?? ''));
-            $l = trim((string)($labels[$i] ?? ''));
-            if ($p !== '' && $u !== '') {
-                if ($p[0] !== '/') $p = '/' . $p;
-                if (substr($p, -1) !== '/') $p .= '/';
-                $targets[$p] = array('url' => $u, 'label' => $l);
+        $before = loadConf();
+        $postedAt  = (int)(trim((string)($_POST['updated_at'] ?? '0')));
+        $currentAt = (int)($before['updated_at'] ?? 0);
+        if ($postedAt > 0 && $postedAt !== $currentAt) {
+            $error = '配置已在其他页面修改过，为避免覆盖，本次未保存。请刷新页面重新编辑。';
+        } else {
+            $default = trim((string)($_POST['default_url'] ?? ''));
+            if ($default === '') { $default = 'https://pan.quark.cn/s/27b2535c2450'; }
+            $targets = array();
+            $paths  = (array)($_POST['path'] ?? array());
+            $labels = (array)($_POST['label'] ?? array());
+            $urls   = (array)($_POST['url'] ?? array());
+            foreach ($paths as $i => $p) {
+                $p = trim((string)$p);
+                $u = trim((string)($urls[$i] ?? ''));
+                $l = trim((string)($labels[$i] ?? ''));
+                if ($p !== '' && $u !== '') {
+                    if ($p[0] !== '/') $p = '/' . $p;
+                    if (substr($p, -1) !== '/') $p .= '/';
+                    $targets[$p] = array('url' => $u, 'label' => $l);
+                }
             }
+            saveConf($default, $targets);
+            $msg = '已保存并生效';
         }
-        saveConf($default, $targets);
-        $msg = '已保存并生效';
     } elseif ($authed && isset($_POST['savepass'])) {
         $new = trim((string)($_POST['newpass'] ?? ''));
         if (strlen($new) < 6) {
@@ -130,6 +140,7 @@ input:focus { outline: none; border-color: #fb7299; }
   <?php if ($msg) echo '<p class="ok">' . htmlspecialchars($msg) . '</p>'; ?>
   <?php if ($error) echo '<p class="err">' . htmlspecialchars($error) . '</p>'; ?>
   <form method="post">
+    <input type="hidden" name="updated_at" value="<?php echo (int)($conf['updated_at'] ?? 0); ?>">
     <div class="card">
       <label>全局默认跳转地址(任何页面未单独指定时使用)</label>
       <input type="text" name="default_url" value="<?php echo htmlspecialchars($default, ENT_QUOTES); ?>" placeholder="https://pan.quark.cn/s/xxxxxx">
