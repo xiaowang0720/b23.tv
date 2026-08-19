@@ -71,6 +71,7 @@ if (!$authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'
         unset($locks[$ip]);
         lockWrite($locks);
         $_SESSION['auth'] = true;
+        session_write_close();
         header('Location: /admin/');
         exit;
     } else {
@@ -115,7 +116,7 @@ if (!$authed) {
             <input type="password" name="password" placeholder="管理密码" required autofocus>
             <button type="submit">登 录</button>
         </form>
-        <div class="hint">本页仅供管理员使用，请勿外传</div>
+        <div class="hint"></div>
     </div></body></html>
     <?php
     exit;
@@ -153,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['op']) && $_POST['op']
             $slugs = (array)($_POST['slug'] ?? []);
             $modes = (array)($_POST['mode'] ?? []);
             $pans  = (array)($_POST['pan'] ?? []);
+            $notes = (array)($_POST['note'] ?? []);
             $dels  = (array)($_POST['delete'] ?? []);
             $links = [];
             $bad   = null;
@@ -169,7 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['op']) && $_POST['op']
                     $bad = '网盘链接需以 http:// 或 https:// 开头（第 ' . ($i + 1) . ' 行）';
                     break;
                 }
-                $links[$slug] = ['mode' => $mode, 'pan' => $pan];
+                $note = trim((string)($notes[$i] ?? ''));
+                if (strlen($note) > 200) {
+                    $bad = 'b站短链备注过长（第 ' . ($i + 1) . ' 行）';
+                    break;
+                }
+                $links[$slug] = ['mode' => $mode, 'pan' => $pan, 'note' => $note];
             }
             if ($bad !== null) {
                 $err = $bad;
@@ -193,7 +200,7 @@ $links = $conf['links'] ?? [];
 $updatedAt = (int)($conf['updated_at'] ?? 0);
 $rows = [];
 foreach ($links as $slug => $v) {
-    $rows[] = ['slug' => $slug, 'mode' => is_array($v) ? (string)($v['mode'] ?? 'malatang') : 'malatang', 'pan' => is_array($v) ? (string)($v['pan'] ?? '') : ''];
+    $rows[] = ['slug' => $slug, 'mode' => is_array($v) ? (string)($v['mode'] ?? 'malatang') : 'malatang', 'pan' => is_array($v) ? (string)($v['pan'] ?? '') : '', 'note' => is_array($v) ? (string)($v['note'] ?? '') : ''];
 }
 $hasLinks = count($rows) > 0;
 
@@ -230,7 +237,7 @@ td{padding:10px;border-bottom:1px solid #f0f2f7;vertical-align:top}
 tbody tr:hover{background:#fafbfe}
 tbody tr.row-del{background:#fdf4f4}
 tbody tr.row-del input,tbody tr.row-del select{color:#b9bdc7;text-decoration:line-through}
-.c-slug{width:190px}.c-mode{width:110px}.c-op{width:86px;text-align:center}
+.c-slug{width:190px}.c-mode{width:110px}.c-note{width:170px}.c-op{width:86px;text-align:center}
 .short-url{font-size:12px;color:#8ea0be;margin-top:4px;word-break:break-all;display:flex;align-items:center;gap:6px}
 .copy-btn{border:0;background:transparent;color:#3478f6;font-size:12px;cursor:pointer;padding:0}
 .copy-btn:hover{text-decoration:underline}
@@ -271,9 +278,10 @@ tbody tr.row-del input,tbody tr.row-del select{color:#b9bdc7;text-decoration:lin
         <div class="table-scroll">
         <table id="linkTable">
             <thead><tr>
-                <th class="c-slug">短链</th>
+                <th class="c-slug">网站路径</th>
                 <th class="c-mode">类型</th>
                 <th>网盘地址（三连模式跳转）</th>
+                <th class="c-note">b站短链(备注)</th>
                 <th class="c-op">操作</th>
             </tr></thead>
             <tbody>
@@ -290,8 +298,9 @@ tbody tr.row-del input,tbody tr.row-del select{color:#b9bdc7;text-decoration:lin
                         </select>
                     </td>
                     <td><input type="text" name="pan[]" value="<?= e($r['pan']) ?>" class="pan-in" <?= $r['mode'] === 'malatang' ? 'disabled placeholder="麻辣烫模式无需填写"' : '' ?>></td>
+                    <td><input type="text" name="note[]" value="<?= e($r['note']) ?>" class="note-in" placeholder="生成的b站短链" maxlength="200"></td>
                     <td class="c-op">
-                        <input type="checkbox" name="delete[]" value="1" class="del" hidden>
+                        <input type="checkbox" name="delete[<?= $i ?>]" value="1" class="del" hidden>
                         <button type="button" class="del-btn">删除</button>
                     </td>
                 </tr>
@@ -378,6 +387,20 @@ tbody tr.row-del input,tbody tr.row-del select{color:#b9bdc7;text-decoration:lin
 
     tbody.querySelectorAll('tr').forEach(bindRow);
 
+    document.getElementById('saveForm').addEventListener('reset', function () {
+        tbody.querySelectorAll('tr').forEach(function (tr) {
+            var del = tr.querySelector('.del');
+            var btn = tr.querySelector('.del-btn');
+            if (!del || !btn) return;
+            del.checked = false;
+            tr.classList.remove('row-del');
+            btn.textContent = '删除';
+            btn.classList.remove('undo');
+            var url = tr.querySelector('.short-url');
+            if (url) url.style.opacity = '1';
+        });
+    });
+
     document.getElementById('addRow').addEventListener('click', function () {
         var tr = document.createElement('tr');
         tr.innerHTML =
@@ -387,7 +410,8 @@ tbody tr.row-del input,tbody tr.row-del select{color:#b9bdc7;text-decoration:lin
             '<td><select name="mode[]" class="mode-in">' +
             '<option value="malatang" selected>麻辣烫</option><option value="redirect">三连</option></select></td>' +
             '<td><input type="text" name="pan[]" value="" class="pan-in" disabled placeholder="麻辣烫模式无需填写"></td>' +
-            '<td class="c-op"><input type="checkbox" name="delete[]" value="1" class="del" hidden>' +
+            '<td><input type="text" name="note[]" value="" class="note-in" placeholder="生成的b站短链" maxlength="200"></td>' +
+            '<td class="c-op"><input type="checkbox" name="delete[' + tbody.rows.length + ']" value="1" class="del" hidden>' +
             '<button type="button" class="del-btn">删除</button></td>';
         tbody.appendChild(tr);
         bindRow(tr);
