@@ -6,7 +6,8 @@
 
 ## 一、项目介绍
 
-- **域名** `yuyubi.cfd` → `116.204.133.21`(阿里云,CentOS 8.0 + nginx 1.14 + PHP-FPM 7.4)
+- **域名** `yuyubi.cfd` / `pan.yuyubi.cfd` / `ihubili.cfd` → 均指向 `116.204.133.21`(阿里云,CentOS 8.0 + nginx 1.14 + PHP-FPM 7.4)
+- **多域名共用同一套短链路由**:三个域名经同一证书(Let's Encrypt,覆盖 `yuyubi.cfd`+`pan.yuyubi.cfd`+`ihubili.cfd`)和同一 `page.php`,访问 `https://{任意域名}/{短链}/` 效果一致;nginx `server_name` 为三者共用
 - **短链格式** `https://yuyubi.cfd/{短链}/`,短链一经创建永久稳定,不随配置变动而改变
 - **两种落地页类型**:
   - **麻辣烫** —— 固定内容落地页(素材图、文案),不带跳转
