@@ -17,8 +17,11 @@ const LOCK_FILE = PRIV_DIR . '/login_lock.json';
 const DEFAULT_PAN = 'https://pan.quark.cn/s/27b2535c2450';
 
 $now = time();
-$err = null;
-$msg = null;
+
+// 读取并清除 Flash 提示消息 (PRG 模式防刷新重复提交)
+$msg = $_SESSION['flash_msg'] ?? null;
+$err = $_SESSION['flash_err'] ?? null;
+unset($_SESSION['flash_msg'], $_SESSION['flash_err']);
 
 function e(?string $s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function urlOk(string $u): bool { return $u !== '' && preg_match('#^https?://#i', $u) === 1 && strlen($u) <= 2048; }
@@ -145,7 +148,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['op']) && $_POST['op']
         if (file_put_contents(PASS_FILE, $content, LOCK_EX) === false) {
             $err = '写入失败，请检查目录权限';
         } else {
-            $msg = '密码已修改成功';
+            $_SESSION['flash_msg'] = '密码已修改成功';
+            session_write_close();
+            header('Location: /admin/');
+            exit;
         }
     }
 }
@@ -177,6 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['op']) && $_POST['op']
                 }
                 $mode = (($modes[$i] ?? '') === 'redirect') ? 'redirect' : 'malatang';
                 $pan  = trim((string)($pans[$i] ?? ''));
+                
+                // 保留了你优秀的判断逻辑：只有在 redirect 模式下才校验网盘链接的合法性
                 if ($mode === 'redirect' && $pan !== '' && !urlOk($pan)) {
                     $bad = '网盘链接需以 http:// 或 https:// 开头（第 ' . ($i + 1) . ' 行）';
                     break;
@@ -197,7 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['op']) && $_POST['op']
                 if (!saveConf($conf)) {
                     $err = '写入 config 失败，请检查服务器权限';
                 } else {
-                    $msg = '配置已保存生效，共 ' . count($links) . ' 个链接';
+                    $_SESSION['flash_msg'] = '配置已保存生效，共 ' . count($links) . ' 个链接';
+                    session_write_close();
+                    header('Location: /admin/');
+                    exit;
                 }
             }
         }
@@ -358,7 +369,6 @@ tbody tr.row-del input, tbody tr.row-del select{color:#bfbfbf;text-decoration:li
                         </select>
                     </td>
                     <td>
-                        <!-- 修改点：由 disabled 改为了 readonly 和样式置灰，保证值被保留并提交 -->
                         <input type="text" name="pan[]" value="<?= e($r['pan']) ?>" class="pan-in" <?= $r['mode'] === 'malatang' ? 'readonly style="background:#fafafa; color:#bfbfbf;" placeholder="内容已保留(当前模式不生效)"' : 'placeholder="http://..."' ?>>
                     </td>
                     <td><input type="text" name="note[]" value="<?= e($r['note']) ?>" class="note-in" placeholder="选填备忘录" maxlength="200"></td>
@@ -482,7 +492,7 @@ function showToast(msg, type = 'success') {
             }
         });
 
-        // 修改点：模式切换时，改为 readonly 以保留内容
+        // 模式切换时，改为 readonly 以保留内容
         mode.addEventListener('change', function () {
             if (mode.value === 'malatang') {
                 pan.readOnly = true;
