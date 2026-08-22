@@ -263,7 +263,7 @@ td{padding:14px;border-bottom:1px solid var(--border);vertical-align:top;transit
 tbody tr:hover{background:#fcfcfd}
 tbody tr.row-del{background:#fff1f0; opacity:0.8;}
 tbody tr.row-del input, tbody tr.row-del select{color:#bfbfbf;text-decoration:line-through;border-color:#f0f0f0;background:#fafafa;pointer-events:none}
-.c-slug{width:220px}.c-mode{width:120px}.c-note{width:180px}.c-op{width:90px;text-align:center}
+.c-slug{width:120px}.c-mode{width:120px}.c-note{width:240px}.c-op{width:90px;text-align:center}
 .short-url{font-size:12px;color:var(--primary);margin-top:8px;display:flex;align-items:center;gap:6px;word-break:break-all}
 .short-url span {background:#e6f4ff;padding:2px 6px;border-radius:4px;}
 
